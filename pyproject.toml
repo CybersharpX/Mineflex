@@ -40,6 +40,7 @@ dev = [
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+pythonpath = ["."]
 testpaths = ["tests", "integration_tests"]
 python_files = "test_*.py"
 
