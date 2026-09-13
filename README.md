@@ -1,12 +1,17 @@
+<div align="center">
+
 # Mineflex
 
-[![Python Tests](https://github.com/mineflex/mineflex/actions/workflows/ci.yml/badge.svg)](https://github.com/mineflex/mineflex/actions)
+[![CI](https://github.com/CybersharpX/Mineflex/actions/workflows/ci.yml/badge.svg)](https://github.com/CybersharpX/Mineflex/actions)
+[![PyPI](https://img.shields.io/pypi/v/mineflex)](https://pypi.org/project/mineflex/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
 **Mineflex** is a production-quality, native Python Minecraft bot framework inspired by and behaviorally compatible with PrismarineJS's [Mineflayer](https://github.com/PrismarineJS/mineflayer).
 
 It is written **100% in native Python** using modern `asyncio`, dataclasses, type hints, and structured event dispatching. It does not use any Node.js runtime, subprocess wrappers, or RPC bridges.
+
+</div>
 
 ---
 
