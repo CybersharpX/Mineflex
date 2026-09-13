@@ -8,7 +8,7 @@ from typing import ClassVar
 from mineflex.constants import BlockFace, DiggingStatus, Hand, ProtocolState
 from mineflex.protocol.buffer import PacketReader, PacketWriter
 from mineflex.protocol.registry import Packet
-from mineflex.types import Position
+from mineflex.types import Position, Vec3
 
 
 @dataclass
@@ -294,13 +294,14 @@ class PlayerActionPacket(Packet):
     name: ClassVar[str] = "player_action"
 
     status: DiggingStatus | int
-    pos: Position
+    pos: Position | Vec3
     face: BlockFace | int
     sequence: int = 0
 
     def write(self, writer: PacketWriter) -> None:
         writer.write_varint(int(self.status))
-        writer.write_position(self.pos)
+        pos = self.pos if isinstance(self.pos, Position) else Position.from_vec3(self.pos)
+        writer.write_position(pos)
         writer.write_byte(int(self.face))
         writer.write_varint(self.sequence)
 
@@ -343,7 +344,7 @@ class UseItemOnPacket(Packet):
     name: ClassVar[str] = "use_item_on"
 
     hand: Hand | int
-    pos: Position
+    pos: Position | Vec3
     face: BlockFace | int
     cursor_x: float = 0.5
     cursor_y: float = 0.5
@@ -353,7 +354,8 @@ class UseItemOnPacket(Packet):
 
     def write(self, writer: PacketWriter) -> None:
         writer.write_varint(int(self.hand))
-        writer.write_position(self.pos)
+        pos = self.pos if isinstance(self.pos, Position) else Position.from_vec3(self.pos)
+        writer.write_position(pos)
         writer.write_varint(int(self.face))
         writer.write_float(self.cursor_x)
         writer.write_float(self.cursor_y)

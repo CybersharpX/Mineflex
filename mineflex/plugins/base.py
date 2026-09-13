@@ -46,8 +46,7 @@ class PluginManager:
                     try:
                         import asyncio
 
-                        loop = asyncio.get_running_loop()
-                        loop.create_task(res)
+                        asyncio.ensure_future(res)
                     except RuntimeError:
                         pass
             elif callable(plugin):
@@ -56,8 +55,7 @@ class PluginManager:
                     try:
                         import asyncio
 
-                        loop = asyncio.get_running_loop()
-                        loop.create_task(res)
+                        asyncio.ensure_future(res)
                     except RuntimeError:
                         pass
             logger.info("Loaded plugin: %s", getattr(plugin, "name", repr(plugin)))

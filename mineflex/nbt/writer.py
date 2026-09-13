@@ -46,22 +46,22 @@ class NBTWriter:
         elif isinstance(tag, TagShort):
             self.stream.write(struct.pack(">h", tag.val))
         elif isinstance(tag, TagInt) or isinstance(tag, int):
-            val = tag.val if isinstance(tag, TagInt) else tag
-            self.stream.write(struct.pack(">i", val))
+            int_val = tag.val if isinstance(tag, TagInt) else tag
+            self.stream.write(struct.pack(">i", int_val))
         elif isinstance(tag, TagLong):
             self.stream.write(struct.pack(">q", tag.val))
         elif isinstance(tag, TagFloat):
             self.stream.write(struct.pack(">f", tag.val))
         elif isinstance(tag, TagDouble) or isinstance(tag, float):
-            val = tag.val if isinstance(tag, TagDouble) else tag
-            self.stream.write(struct.pack(">d", val))
+            dbl_val = tag.val if isinstance(tag, TagDouble) else tag
+            self.stream.write(struct.pack(">d", dbl_val))
         elif isinstance(tag, TagByteArray) or isinstance(tag, (bytes, bytearray)):
-            val = tag.val if isinstance(tag, TagByteArray) else bytes(tag)
-            self.stream.write(struct.pack(">i", len(val)))
-            self.stream.write(val)
+            byte_val = tag.val if isinstance(tag, TagByteArray) else bytes(tag)
+            self.stream.write(struct.pack(">i", len(byte_val)))
+            self.stream.write(byte_val)
         elif isinstance(tag, TagString) or isinstance(tag, str):
-            val = tag.val if isinstance(tag, TagString) else tag
-            self.write_string(val)
+            str_val = tag.val if isinstance(tag, TagString) else tag
+            self.write_string(str_val)
         elif isinstance(tag, TagList):
             self.write_tag_id(tag.item_type)
             self.stream.write(struct.pack(">i", len(tag)))

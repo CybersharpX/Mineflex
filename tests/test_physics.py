@@ -100,3 +100,45 @@ def test_auto_stepping():
     assert engine.position.z > 2.0
     assert math.isclose(engine.position.y, 62.0, abs_tol=0.05)
     assert engine.on_ground is True
+
+
+def test_liquid_water_and_lava_physics():
+    world = World()
+    # Water column around Y=60 to 65
+    for y in range(60, 66):
+        world.set_block_state(Vec3(0, y, 0), 26)
+
+    engine = PhysicsEngine(position=Vec3(0.5, 64.0, 0.5))
+    engine.velocity = Vec3(0, -0.5, 0)
+    engine.tick(world)
+
+    # In water, terminal descent is dampened and drag is applied
+    assert engine.velocity.y > -0.5
+
+    # Jumping in water swims upward
+    engine.controls.jump = True
+    engine.tick(world)
+    assert engine.velocity.y > 0.0
+
+
+def test_climbing_ladder_physics():
+    world = World()
+    # Ladder block at Y=64 (ladder default_state_id is 260)
+    world.set_block_state(Vec3(0, 64, 0), 260)
+
+    engine = PhysicsEngine(position=Vec3(0.5, 64.0, 0.5))
+    engine.controls.forward = True
+    engine.tick(world)
+
+    # Ascends on ladder with forward pressed
+    assert engine.velocity.y >= 0.14
+
+
+def test_knockback_impulse():
+    engine = PhysicsEngine(position=Vec3(0, 64, 0))
+    assert engine.velocity.x == 0.0
+
+    engine.apply_knockback(Vec3(1.5, 0.4, -0.8))
+    assert engine.velocity.x == 1.5
+    assert engine.velocity.y == 0.4
+    assert engine.velocity.z == -0.8

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING, Callable, List, Optional, Union
 
 from mineflex.protocol.packets.play.world import BlockUpdatePacket, ChunkDataPacket
@@ -50,6 +51,35 @@ def inject_blocks(bot: Bot) -> None:
         orig = point or bot.entity.position
         return bot.world.find_block(matching, orig, max_distance=max_distance)
 
+    def block_at_cursor(max_distance: float = 4.5) -> Optional[Block]:
+        """Get the block the bot is currently looking at."""
+        yaw_rad = math.radians(bot.entity.yaw)
+        pitch_rad = math.radians(bot.entity.pitch)
+        dx = -math.sin(yaw_rad) * math.cos(pitch_rad)
+        dy = -math.sin(pitch_rad)
+        dz = math.cos(yaw_rad) * math.cos(pitch_rad)
+        dir_vec = Vec3(dx, dy, dz)
+        hit = bot.world.raycast(bot.entity.eye_position, dir_vec, max_distance=max_distance)
+        return hit[0] if hit else None
+
+    def can_see_block(block: Block, max_distance: float = 4.5) -> bool:
+        """Check if bot has an unobstructed line of sight to target block."""
+        eye_pos = bot.entity.eye_position
+        target_pos = block.position + Vec3(0.5, 0.5, 0.5)
+        diff = target_pos - eye_pos
+        dist = diff.length()
+        if dist > max_distance:
+            return False
+        if dist == 0:
+            return True
+        hit = bot.world.raycast(eye_pos, diff.normalize(), max_distance=dist + 0.05)
+        if hit is None:
+            return True
+        return hit[0].position == block.position
+
     bot.block_at = block_at  # type: ignore
     bot.find_blocks = find_blocks  # type: ignore
     bot.find_block = find_block  # type: ignore
+    bot.block_at_cursor = block_at_cursor  # type: ignore
+    bot.block_in_sight = block_at_cursor  # type: ignore
+    bot.can_see_block = can_see_block  # type: ignore

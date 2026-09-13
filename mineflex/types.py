@@ -107,6 +107,8 @@ class Vec3:
     def norm(self) -> float:
         return math.sqrt(self._x * self._x + self._y * self._y + self._z * self._z)
 
+    length = norm
+
     def norm_squared(self) -> float:
         return self._x * self._x + self._y * self._y + self._z * self._z
 
@@ -137,6 +139,10 @@ class Vec3:
 
     def to_tuple(self) -> tuple[float, float, float]:
         return (self._x, self._y, self._z)
+
+    def to_position(self) -> Position:
+        """Convert continuous 3D vector to integer grid block Position."""
+        return Position.from_vec3(self)
 
 
 @dataclass(frozen=True)

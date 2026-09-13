@@ -20,10 +20,9 @@ if TYPE_CHECKING:
 
 
 def inject_physics(bot: Bot) -> None:
-    """Inject physics simulation, movement controls, and positioning into bot."""
     bot.physics = PhysicsEngine()
     bot.physics_enabled = getattr(bot, "physics_enabled", True)
-    bot._physics_task: asyncio.Task | None = None
+    bot._physics_task = None
     bot._spawned = False
 
     async def on_sync_position(packet: SynchronizePositionPacket) -> None:
@@ -92,10 +91,20 @@ def inject_physics(bot: Bot) -> None:
         pitch = math.degrees(pitch_rad)
         await look(yaw, pitch, force=force)
 
+    def get_control_state(control: str) -> bool:
+        """Get the current boolean state of a movement control."""
+        return getattr(bot.physics.controls, control, False)
+
+    async def wait_for_ticks(ticks: int) -> None:
+        """Asynchronously wait for the specified number of physics simulation ticks."""
+        await asyncio.sleep(ticks * PHYSICS_TICK_INTERVAL)
+
     bot.set_control_state = set_control_state  # type: ignore
+    bot.get_control_state = get_control_state  # type: ignore
     bot.clear_control_states = clear_control_states  # type: ignore
     bot.look = look  # type: ignore
     bot.look_at = look_at  # type: ignore
+    bot.wait_for_ticks = wait_for_ticks  # type: ignore
 
 
 async def _physics_loop(bot: Bot) -> None:

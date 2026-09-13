@@ -41,8 +41,19 @@ def inject_actions(bot: Bot) -> None:
     async def dismount() -> None:
         await bot.vehicle_manager.dismount()
 
+    def can_dig_block(block: Block) -> bool:
+        """Check if block is diggable and within reach."""
+        return block.diggable and bot.entity.position.distance_to(block.position) <= 5.5
+
+    def dig_time(block: Block) -> float:
+        """Calculate digging duration in seconds with currently held item."""
+        held = bot.held_item
+        return bot.digging_manager.calculate_dig_time(block, held)
+
     bot.dig = dig  # type: ignore
     bot.stop_digging = stop_digging  # type: ignore
+    bot.can_dig_block = can_dig_block  # type: ignore
+    bot.dig_time = dig_time  # type: ignore
     bot.place_block = place_block  # type: ignore
     bot.attack = attack  # type: ignore
     bot.mount = mount  # type: ignore

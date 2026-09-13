@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import warnings
+from typing import Any
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms
 
+CFB8: Any
 try:
     from cryptography.hazmat.decrepit.ciphers import modes as decrepit_modes
 

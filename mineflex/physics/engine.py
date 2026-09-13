@@ -92,11 +92,21 @@ class PhysicsEngine:
             acc_z = (forward * cos_yaw + strafe * sin_yaw) * speed
             self.velocity = self.velocity.offset(acc_x, 0.0, acc_z)
 
-        # 3. Apply gravity
+        # 3. Apply gravity and fluid / climbable physics
         block_at_player = world.get_block(self.position)
         in_water = block_at_player.name == "water"
+        in_lava = block_at_player.name == "lava"
+        is_climbing = block_at_player.name in ("ladder", "vine", "scaffolding")
 
-        if in_water:
+        if is_climbing:
+            if forward > 0 or self.controls.jump:
+                new_vy = 0.15
+            elif self.controls.sneak:
+                new_vy = 0.0
+            else:
+                new_vy = max(self.velocity.y, -0.15)
+            self.velocity = Vec3(self.velocity.x * 0.8, new_vy, self.velocity.z * 0.8)
+        elif in_water:
             self.velocity = Vec3(
                 self.velocity.x * 0.8,
                 max(self.velocity.y * 0.8 - 0.02, -0.15),
@@ -104,6 +114,14 @@ class PhysicsEngine:
             )
             if self.controls.jump:
                 self.velocity = Vec3(self.velocity.x, 0.04, self.velocity.z)
+        elif in_lava:
+            self.velocity = Vec3(
+                self.velocity.x * 0.5,
+                max(self.velocity.y * 0.5 - 0.02, -0.1),
+                self.velocity.z * 0.5,
+            )
+            if self.controls.jump:
+                self.velocity = Vec3(self.velocity.x, 0.02, self.velocity.z)
         else:
             new_vy = max(self.velocity.y - PHYSICS_GRAVITY, -PHYSICS_TERMINAL_VELOCITY)
             self.velocity = Vec3(self.velocity.x, new_vy, self.velocity.z)
@@ -116,6 +134,13 @@ class PhysicsEngine:
             step_height=self.step_height,
             is_on_ground=self.on_ground,
         )
+
+        # Sneaking ledge containment: avoid falling off ledges if crouching
+        if self.controls.sneak and self.on_ground:
+            test_pos = self.position + Vec3(adjusted_vel.x, -0.6, adjusted_vel.z)
+            block_below = world.get_block(test_pos)
+            if block_below.is_air:
+                adjusted_vel = Vec3(0.0, adjusted_vel.y, 0.0)
 
         self.position = self.position + adjusted_vel
         self.on_ground = on_ground
@@ -135,6 +160,10 @@ class PhysicsEngine:
             final_vy * PHYSICS_AIR_DRAG,
             adjusted_vel.z * friction,
         )
+
+    def apply_knockback(self, knockback: Vec3) -> None:
+        """Apply an external knockback impulse to the entity's velocity."""
+        self.velocity = self.velocity + knockback
 
     def simulate_ticks(self, world: World, ticks: int) -> None:
         """Simulate a specified number of physics ticks."""

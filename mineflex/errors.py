@@ -23,6 +23,10 @@ class PacketError(ProtocolError):
     """Raised when packet deserialization, serialization, or framing fails."""
 
 
+class NBTError(MineflexError):
+    """Raised when NBT parsing or serialization fails."""
+
+
 class UnsupportedVersionError(ProtocolError):
     """Raised when an unsupported Minecraft protocol version is requested or encountered."""
 

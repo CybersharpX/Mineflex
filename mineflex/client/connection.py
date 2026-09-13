@@ -10,6 +10,12 @@ from mineflex.errors import ConnectionError
 from mineflex.logging import get_logger
 from mineflex.protocol.encryption import EncryptionCipher
 from mineflex.protocol.framing import PacketFramer
+from mineflex.protocol.packets.configuration import (
+    FinishConfigurationClientboundPacket,
+    FinishConfigurationServerboundPacket,
+    KeepAliveConfigurationClientboundPacket,
+    KeepAliveConfigurationServerboundPacket,
+)
 from mineflex.protocol.packets.login import SetCompressionPacket
 from mineflex.protocol.packets.play.keepalive import (
     KeepAliveClientboundPacket,
@@ -20,6 +26,29 @@ from mineflex.protocol.registry import Packet, ProtocolRegistry
 logger = get_logger("mineflex.client")
 
 PacketHandler = Union[Callable[[Any], Any], Callable[[Any], Coroutine[Any, Any, Any]]]
+
+
+class DecryptingStreamReader:
+    """Wraps an asyncio.StreamReader to decrypt incoming bytes on the fly."""
+
+    def __init__(self, reader: asyncio.StreamReader, cipher: EncryptionCipher) -> None:
+        self._reader = reader
+        self._cipher = cipher
+
+    async def read(self, n: int = -1) -> bytes:
+        raw = await self._reader.read(n)
+        return self._cipher.decrypt(raw) if raw else raw
+
+    async def readexactly(self, n: int) -> bytes:
+        raw = await self._reader.readexactly(n)
+        return self._cipher.decrypt(raw)
+
+    async def readline(self) -> bytes:
+        raw = await self._reader.readline()
+        return self._cipher.decrypt(raw)
+
+    def at_eof(self) -> bool:
+        return self._reader.at_eof()
 
 
 class ClientConnection:
@@ -97,6 +126,8 @@ class ClientConnection:
         """Enable AES-128 CFB8 stream encryption."""
         logger.debug("Enabling AES-128 CFB8 network encryption")
         self.cipher = EncryptionCipher(shared_secret)
+        if self.reader:
+            self.reader = DecryptingStreamReader(self.reader, self.cipher)  # type: ignore
 
     async def send_packet(self, packet: Packet) -> None:
         """Encode, frame, and send a typed packet."""
@@ -154,10 +185,19 @@ class ClientConnection:
                 if isinstance(packet, SetCompressionPacket):
                     self.set_compression(packet.threshold)
                 elif isinstance(packet, KeepAliveClientboundPacket):
-                    # Automatic Keep-Alive reply
+                    # Automatic Keep-Alive reply in Play
                     await self.send_packet(
                         KeepAliveServerboundPacket(keep_alive_id=packet.keep_alive_id)
                     )
+                elif isinstance(packet, KeepAliveConfigurationClientboundPacket):
+                    # Automatic Keep-Alive reply in Configuration
+                    await self.send_packet(
+                        KeepAliveConfigurationServerboundPacket(keep_alive_id=packet.keep_alive_id)
+                    )
+                elif isinstance(packet, FinishConfigurationClientboundPacket):
+                    # Acknowledge configuration finish and enter PLAY
+                    await self.send_packet(FinishConfigurationServerboundPacket())
+                    self.set_state(ProtocolState.PLAY)
 
                 # Dispatch to registered handlers
                 await self._dispatch_packet(packet_id, payload, packet)

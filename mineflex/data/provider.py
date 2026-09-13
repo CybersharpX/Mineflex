@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 
 @dataclass(frozen=True)
@@ -177,6 +177,18 @@ class Registry:
                             ingredients=tuple(r.get("ingredients", ())),
                         )
                     )
+
+    def get_block(self, id_or_name: Union[int, str]) -> Optional[BlockDefinition]:
+        """Get BlockDefinition by ID or block name."""
+        if isinstance(id_or_name, int):
+            return self.blocks.get(id_or_name)
+        return self.blocks_by_name.get(id_or_name)
+
+    def get_item(self, id_or_name: Union[int, str]) -> Optional[ItemDefinition]:
+        """Get ItemDefinition by ID or item name."""
+        if isinstance(id_or_name, int):
+            return self.items.get(id_or_name)
+        return self.items_by_name.get(id_or_name)
 
     def get_block_by_state_id(self, state_id: int) -> Optional[BlockDefinition]:
         """Get BlockDefinition by state ID, defaulting to air if unknown."""

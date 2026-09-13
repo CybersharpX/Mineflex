@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Any, ClassVar, Iterator, Mapping, MutableMapping, Sequence
+from typing import Any, ClassVar, Iterator, Mapping, MutableMapping, Sequence, Union
 
 
 class TagType(IntEnum):
@@ -131,7 +131,7 @@ class TagList(NBTTag, Sequence[Any]):
     def append(self, item: Any) -> None:
         self._items.append(item)
 
-    def __getitem__(self, index: int) -> Any:
+    def __getitem__(self, index: Union[int, slice]) -> Any:
         return self._items[index]
 
     def __len__(self) -> int:

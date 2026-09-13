@@ -56,6 +56,7 @@ class DiggingStatus(IntEnum):
     DROP_ITEM_STACK = 3
     DROP_ITEM = 4
     SHOOT_ARROW_OR_FINISH_EATING = 5
+    RELEASE_USE_ITEM = 5
     SWAP_ITEM_WITH_OFFHAND = 6
 
 

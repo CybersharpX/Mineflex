@@ -190,3 +190,62 @@ def test_protocol_registry_packets():
     assert isinstance(decoded_sync, SynchronizePositionPacket)
     assert decoded_sync.x == 10.5
     assert decoded_sync.teleport_id == 42
+
+
+def test_configuration_state_packets():
+    from mineflex.protocol.packets.configuration import (
+        FeatureFlagsPacket,
+        FinishConfigurationClientboundPacket,
+        FinishConfigurationServerboundPacket,
+        KeepAliveConfigurationClientboundPacket,
+        KnownPacksPacket,
+    )
+
+    registry = ProtocolRegistry.for_version("1.20.2")
+
+    # Finish configuration clientbound
+    finish_client = FinishConfigurationClientboundPacket()
+    dec_fc = registry.decode_packet(
+        ProtocolState.CONFIGURATION,
+        is_serverbound=False,
+        packet_id=0x02,
+        payload=finish_client.encode(),
+    )
+    assert isinstance(dec_fc, FinishConfigurationClientboundPacket)
+
+    # Finish configuration serverbound
+    finish_server = FinishConfigurationServerboundPacket()
+    dec_fs = registry.decode_packet(
+        ProtocolState.CONFIGURATION,
+        is_serverbound=True,
+        packet_id=0x02,
+        payload=finish_server.encode(),
+    )
+    assert isinstance(dec_fs, FinishConfigurationServerboundPacket)
+
+    # Feature flags
+    flags = FeatureFlagsPacket(features=["minecraft:vanilla", "minecraft:bundle"])
+    dec_flags = registry.decode_packet(
+        ProtocolState.CONFIGURATION,
+        is_serverbound=False,
+        packet_id=0x08,
+        payload=flags.encode(),
+    )
+    assert isinstance(dec_flags, FeatureFlagsPacket)
+    assert dec_flags.features == ["minecraft:vanilla", "minecraft:bundle"]
+
+    # Known packs
+    packs = KnownPacksPacket(packs=[("minecraft", "core", "1.20.2")])
+    dec_packs = registry.decode_packet(
+        ProtocolState.CONFIGURATION, is_serverbound=False, packet_id=0x0E, payload=packs.encode()
+    )
+    assert isinstance(dec_packs, KnownPacksPacket)
+    assert dec_packs.packs == [("minecraft", "core", "1.20.2")]
+
+    # KeepAlive configuration
+    ka = KeepAliveConfigurationClientboundPacket(keep_alive_id=987654321)
+    dec_ka = registry.decode_packet(
+        ProtocolState.CONFIGURATION, is_serverbound=False, packet_id=0x04, payload=ka.encode()
+    )
+    assert isinstance(dec_ka, KeepAliveConfigurationClientboundPacket)
+    assert dec_ka.keep_alive_id == 987654321

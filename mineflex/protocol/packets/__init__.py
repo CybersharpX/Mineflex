@@ -123,3 +123,24 @@ def register_standard_packets(registry: ProtocolRegistry) -> None:
     registry.register(ClickContainerPacket)
     registry.register(CloseContainerServerboundPacket)
     registry.register(SetHeldItemPacket)
+
+    # Configuration (1.20.2+)
+    from mineflex.protocol.packets.configuration import (
+        DisconnectConfigurationPacket,
+        FeatureFlagsPacket,
+        FinishConfigurationClientboundPacket,
+        FinishConfigurationServerboundPacket,
+        KeepAliveConfigurationClientboundPacket,
+        KeepAliveConfigurationServerboundPacket,
+        KnownPacksPacket,
+        RegistryDataPacket,
+    )
+
+    registry.register(FinishConfigurationClientboundPacket)
+    registry.register(FinishConfigurationServerboundPacket)
+    registry.register(RegistryDataPacket)
+    registry.register(FeatureFlagsPacket)
+    registry.register(KnownPacksPacket)
+    registry.register(KeepAliveConfigurationClientboundPacket)
+    registry.register(KeepAliveConfigurationServerboundPacket)
+    registry.register(DisconnectConfigurationPacket)

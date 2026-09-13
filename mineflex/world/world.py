@@ -5,7 +5,8 @@ from __future__ import annotations
 import math
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
-from mineflex.data.provider import Registry
+from mineflex.constants import BlockFace
+from mineflex.data.provider import BlockDefinition, Registry
 from mineflex.protocol.packets.play.world import ChunkDataPacket
 from mineflex.types import AABB, Position, Vec3
 from mineflex.world.block import Block
@@ -60,6 +61,10 @@ class World:
         z = math.floor(pos.z)
         state_id = self.get_block_state(pos)
         block_def = self.registry.get_block_by_state_id(state_id)
+        if block_def is None:
+            block_def = self.registry.get_block(0) or BlockDefinition(
+                0, "air", 0.0, False, True, False, "empty"
+            )
         return Block(
             position=Vec3(float(x), float(y), float(z)),
             state_id=state_id,
@@ -140,3 +145,95 @@ class World:
             return None
         matches.sort(key=lambda p: p.distance_squared(point))
         return self.get_block(matches[0])
+
+    def unload_chunk(self, chunk_x: int, chunk_z: int) -> None:
+        """Unload a chunk column from memory."""
+        self.chunks.pop((chunk_x, chunk_z), None)
+
+    def reset(self) -> None:
+        """Clear all loaded chunks."""
+        self.chunks.clear()
+
+    def raycast(
+        self,
+        origin: Vec3,
+        direction: Vec3,
+        max_distance: float = 4.5,
+        matcher: Optional[Callable[[Block], bool]] = None,
+    ) -> Optional[Tuple[Block, Vec3, BlockFace]]:
+        """Amanatides-Woo 3D voxel grid traversal algorithm.
+
+        Returns (block, hit_point, face) of the first block intersected,
+        or None if no block intersected within max_distance.
+        """
+        dir_norm = direction.normalize()
+        if dir_norm.length() == 0:
+            return None
+
+        current_x = math.floor(origin.x)
+        current_y = math.floor(origin.y)
+        current_z = math.floor(origin.z)
+
+        step_x = 1 if dir_norm.x > 0 else (-1 if dir_norm.x < 0 else 0)
+        step_y = 1 if dir_norm.y > 0 else (-1 if dir_norm.y < 0 else 0)
+        step_z = 1 if dir_norm.z > 0 else (-1 if dir_norm.z < 0 else 0)
+
+        t_delta_x = abs(1.0 / dir_norm.x) if dir_norm.x != 0 else float("inf")
+        t_delta_y = abs(1.0 / dir_norm.y) if dir_norm.y != 0 else float("inf")
+        t_delta_z = abs(1.0 / dir_norm.z) if dir_norm.z != 0 else float("inf")
+
+        if dir_norm.x > 0:
+            t_max_x = (current_x + 1.0 - origin.x) * t_delta_x
+        elif dir_norm.x < 0:
+            t_max_x = (origin.x - current_x) * t_delta_x
+        else:
+            t_max_x = float("inf")
+
+        if dir_norm.y > 0:
+            t_max_y = (current_y + 1.0 - origin.y) * t_delta_y
+        elif dir_norm.y < 0:
+            t_max_y = (origin.y - current_y) * t_delta_y
+        else:
+            t_max_y = float("inf")
+
+        if dir_norm.z > 0:
+            t_max_z = (current_z + 1.0 - origin.z) * t_delta_z
+        elif dir_norm.z < 0:
+            t_max_z = (origin.z - current_z) * t_delta_z
+        else:
+            t_max_z = float("inf")
+
+        traveled = 0.0
+        face = BlockFace.TOP
+
+        while traveled <= max_distance:
+            block = self.get_block(Vec3(current_x, current_y, current_z))
+            is_match = matcher(block) if matcher else (block.solid and not block.is_air)
+            if is_match and traveled > 0:
+                hit_point = origin + dir_norm * traveled
+                return block, hit_point, face
+
+            if t_max_x < t_max_y:
+                if t_max_x < t_max_z:
+                    traveled = t_max_x
+                    t_max_x += t_delta_x
+                    current_x += step_x
+                    face = BlockFace.WEST if step_x > 0 else BlockFace.EAST
+                else:
+                    traveled = t_max_z
+                    t_max_z += t_delta_z
+                    current_z += step_z
+                    face = BlockFace.NORTH if step_z > 0 else BlockFace.SOUTH
+            else:
+                if t_max_y < t_max_z:
+                    traveled = t_max_y
+                    t_max_y += t_delta_y
+                    current_y += step_y
+                    face = BlockFace.BOTTOM if step_y > 0 else BlockFace.TOP
+                else:
+                    traveled = t_max_z
+                    t_max_z += t_delta_z
+                    current_z += step_z
+                    face = BlockFace.NORTH if step_z > 0 else BlockFace.SOUTH
+
+        return None

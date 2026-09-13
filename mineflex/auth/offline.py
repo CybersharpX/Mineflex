@@ -24,6 +24,11 @@ def offline_uuid(username: str) -> uuid.UUID:
 class OfflineAuthProvider(AuthProvider):
     """Generates an offline session with deterministic UUID without network calls."""
 
+    @staticmethod
+    def generate_offline_uuid(username: str) -> uuid.UUID:
+        """Generate deterministic offline player UUID matching vanilla Java Edition."""
+        return offline_uuid(username)
+
     async def authenticate(self, username: str, **kwargs) -> Session:
         player_uuid = offline_uuid(username)
         return Session(

@@ -49,7 +49,10 @@ class PacketFramer:
         if length <= 0 or length > 2097152:  # Max 2MB packet
             raise PacketError(f"Invalid frame length: {length}")
 
-        frame_data = await reader.readexactly(length)
+        try:
+            frame_data = await reader.readexactly(length)
+        except asyncio.IncompleteReadError as exc:
+            raise ConnectionError("Connection closed while reading packet frame") from exc
 
         if self.compression_threshold >= 0:
             buffer_reader = PacketReader(frame_data)

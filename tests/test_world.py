@@ -73,3 +73,20 @@ def test_world_collision_boxes():
     # Non-intersecting box
     non_colliding = AABB(0, 0, 0, 1, 1, 1)
     assert len(world.get_colliding_bounding_boxes(non_colliding)) == 0
+
+
+def test_world_raycast():
+    world = World()
+    # Place a stone block at (0, 64, 5)
+    world.set_block_state(Vec3(0, 64, 5), 1)
+
+    # Raycast from (0.5, 64.5, 0.5) looking straight in +Z
+    hit = world.raycast(Vec3(0.5, 64.5, 0.5), Vec3(0, 0, 1), max_distance=6.0)
+    assert hit is not None
+    hit_block, hit_point, hit_face = hit
+    assert hit_block.name == "stone"
+    assert hit_block.position == Vec3(0, 64, 5)
+
+    # Raycast in opposite direction (-Z) misses
+    miss = world.raycast(Vec3(0.5, 64.5, 0.5), Vec3(0, 0, -1), max_distance=6.0)
+    assert miss is None

@@ -1,6 +1,7 @@
-"""Unit tests for chat components and parsers."""
-
+import asyncio
 import json
+
+import pytest
 
 from mineflex.chat import parse_chat
 
@@ -42,3 +43,27 @@ def test_legacy_section_formatting():
     assert comp.extra[1].text == "Mineflex"
     assert comp.extra[2].color is None
     assert comp.extra[2].text == "!"
+
+
+@pytest.mark.asyncio
+async def test_chat_patterns_and_await_message():
+    from mineflex.bot import Bot
+    from mineflex.protocol.packets.play.chat import SystemChatPacket
+
+    bot = Bot(username="ChatTester")
+
+    matches_received = []
+    bot.add_chat_pattern("teleport_request", r"(\w+) wants to teleport to you")
+    bot.on("chat:teleport_request", lambda groups, text, comp: matches_received.append(groups[0]))
+
+    # Simulate incoming system packet
+    packet = SystemChatPacket(
+        content='{"text": "Alice wants to teleport to you"}',
+        overlay=False,
+    )
+    for handler in bot.client._handlers.get(SystemChatPacket, []):
+        handler(packet)
+    await asyncio.sleep(0.01)
+
+    assert len(matches_received) == 1
+    assert matches_received[0] == "Alice"
