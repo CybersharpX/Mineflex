@@ -1,0 +1,15 @@
+[
+  {"id": 0, "name": "the_void", "category": "none", "temperature": 0.5},
+  {"id": 1, "name": "plains", "category": "plains", "temperature": 0.8},
+  {"id": 2, "name": "sunflower_plains", "category": "plains", "temperature": 0.8},
+  {"id": 3, "name": "snowy_plains", "category": "icy", "temperature": 0.0},
+  {"id": 4, "name": "desert", "category": "desert", "temperature": 2.0},
+  {"id": 5, "name": "swamp", "category": "swamp", "temperature": 0.8},
+  {"id": 6, "name": "forest", "category": "forest", "temperature": 0.7},
+  {"id": 7, "name": "flower_forest", "category": "forest", "temperature": 0.7},
+  {"id": 8, "name": "birch_forest", "category": "forest", "temperature": 0.6},
+  {"id": 10, "name": "ocean", "category": "ocean", "temperature": 0.5},
+  {"id": 11, "name": "deep_ocean", "category": "ocean", "temperature": 0.5},
+  {"id": 20, "name": "nether_wastes", "category": "nether", "temperature": 2.0},
+  {"id": 30, "name": "the_end", "category": "the_end", "temperature": 0.5}
+]

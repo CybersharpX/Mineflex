@@ -1,0 +1,15 @@
+[
+  {"id": 116, "name": "player", "category": "player", "width": 0.6, "height": 1.8},
+  {"id": 125, "name": "zombie", "category": "hostile", "width": 0.6, "height": 1.95},
+  {"id": 120, "name": "skeleton", "category": "hostile", "width": 0.6, "height": 1.99},
+  {"id": 35, "name": "creeper", "category": "hostile", "width": 0.6, "height": 1.7},
+  {"id": 110, "name": "spider", "category": "hostile", "width": 1.4, "height": 0.9},
+  {"id": 34, "name": "cow", "category": "passive", "width": 0.9, "height": 1.4},
+  {"id": 105, "name": "sheep", "category": "passive", "width": 0.9, "height": 1.3},
+  {"id": 101, "name": "pig", "category": "passive", "width": 0.9, "height": 0.9},
+  {"id": 32, "name": "chicken", "category": "passive", "width": 0.4, "height": 0.7},
+  {"id": 70, "name": "item", "category": "object", "width": 0.25, "height": 0.25},
+  {"id": 40, "name": "experience_orb", "category": "object", "width": 0.5, "height": 0.5},
+  {"id": 11, "name": "boat", "category": "vehicle", "width": 1.375, "height": 0.5625},
+  {"id": 73, "name": "minecart", "category": "vehicle", "width": 0.98, "height": 0.7}
+]

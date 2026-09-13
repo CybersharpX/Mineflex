@@ -1,0 +1,52 @@
+[
+  {
+    "name": "oak_planks",
+    "result": {"id": 15, "count": 4},
+    "ingredients": [68]
+  },
+  {
+    "name": "stick",
+    "result": {"id": 600, "count": 4},
+    "ingredients": [15, 15]
+  },
+  {
+    "name": "crafting_table",
+    "result": {"id": 200, "count": 1},
+    "ingredients": [15, 15, 15, 15]
+  },
+  {
+    "name": "chest",
+    "result": {"id": 215, "count": 1},
+    "ingredients": [15, 15, 15, 15, 15, 15, 15, 15]
+  },
+  {
+    "name": "wooden_pickaxe",
+    "result": {"id": 601, "count": 1},
+    "ingredients": [15, 15, 15, 600, 600]
+  },
+  {
+    "name": "stone_pickaxe",
+    "result": {"id": 602, "count": 1},
+    "ingredients": [14, 14, 14, 600, 600]
+  },
+  {
+    "name": "iron_pickaxe",
+    "result": {"id": 603, "count": 1},
+    "ingredients": [631, 631, 631, 600, 600]
+  },
+  {
+    "name": "diamond_pickaxe",
+    "result": {"id": 604, "count": 1},
+    "ingredients": [633, 633, 633, 600, 600]
+  },
+  {
+    "name": "wooden_sword",
+    "result": {"id": 610, "count": 1},
+    "ingredients": [15, 15, 600]
+  },
+  {
+    "name": "diamond_sword",
+    "result": {"id": 612, "count": 1},
+    "ingredients": [633, 633, 600]
+  }
+]
